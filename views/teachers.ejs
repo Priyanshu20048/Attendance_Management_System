@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Management | Attendify</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --sidebar-blue: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
+      --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      --bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); padding: 40px; line-height: 1.6; }
+
+    /* Header */
+    .page-header { max-width: 1100px; margin: 0 auto 40px; }
+    .title { font-size: 2.2rem; font-weight: 800; color: #1e3a8a; letter-spacing: -0.02em; }
+    .subtitle { color: var(--text-muted); font-size: 1rem; margin-top: 5px; }
+
+    .top-bar { max-width: 1100px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center; }
+    .back-btn {
+      display: flex; align-items: center; gap: 8px; padding: 12px 24px;
+      background: white; border: 1px solid var(--border); border-radius: 50px;
+      text-decoration: none; color: var(--text-main); font-weight: 600; transition: 0.3s;
+      box-shadow: var(--shadow);
+    }
+    .back-btn:hover { background: #f1f5f9; transform: translateX(-5px); }
+
+    /* Alert */
+    .alert { padding: 15px; border-radius: 12px; margin: 0 auto 20px; max-width: 1100px; text-align: center; font-weight: 600; }
+    .error { background: #fee2e2; color: #b91c1c; }
+    .success { background: #dcfce7; color: #15803d; }
+
+    /* Form Card */
+    .form-container {
+      background: white; border-radius: 24px; border: 1px solid var(--border);
+      padding: 35px; max-width: 1100px; margin: 0 auto 40px; box-shadow: var(--shadow);
+    }
+    .form-container h3 { font-size: 1.3rem; margin-bottom: 5px; color: #1e3a8a; font-weight: 700; }
+    .form-container small { display: block; margin-bottom: 25px; color: var(--text-muted); line-height: 1.4; }
+
+    /* Inputs */
+    .input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .input-field {
+      width: 100%; padding: 14px 20px; border-radius: 12px; border: 1.5px solid var(--border);
+      background: #f8fafc; outline: none; transition: 0.3s; font-family: inherit;
+    }
+    .input-field:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+
+    .btn {
+      padding: 14px 28px; border-radius: 12px; border: none; font-weight: 700;
+      cursor: pointer; transition: 0.3s; font-family: inherit;
+    }
+    .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); }
+
+    /* Table */
+    .table-wrapper {
+      background: white; border-radius: 24px; border: 1px solid var(--border);
+      padding: 35px; max-width: 1100px; margin: 0 auto; box-shadow: var(--shadow);
+    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    th { padding: 15px; text-align: left; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
+    td { padding: 15px; background: #f8fafc; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    td:first-child { border-left: 1px solid var(--border); border-radius: 15px 0 0 15px; }
+    td:last-child { border-right: 1px solid var(--border); border-radius: 0 15px 15px 0; }
+
+    .teacher-photo { width: 45px; height: 45px; border-radius: 12px; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .badge { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-right: 4px; display: inline-block; }
+
+    .action-btn { padding: 8px 16px; border-radius: 8px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-left: 5px; }
+    .btn-update { background: #dcfce7; color: #166534; }
+    .btn-delete { background: #fee2e2; color: #991b1b; }
+
+    /* Hidden Row Animation */
+    .update-row { display: none; }
+    .update-inner { background: #f1f5f9 !important; border-radius: 15px !important; padding: 25px !important; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="title">Teacher Management</div>
+    <div class="subtitle">Organize faculty members, assign subjects, and manage class responsibilities.</div>
+  </div>
+
+  <div class="top-bar">
+    <a href="/admin/dashboard" class="back-btn">← Back to Dashboard</a>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %> <div class="alert error"><%= error %></div> <% } %>
+  <% if (typeof success !== 'undefined' && success) { %> <div class="alert success"><%= success %></div> <% } %>
+
+  <div class="form-container">
+    <h3>Register New Faculty</h3>
+    <small>Assign a unique email and list all classes handled (e.g., 5A, 6B, 10C).</small>
+    
+    <form action="/admin/teachers/add" method="POST">
+      <div class="input-grid">
+        <input type="text" name="name" placeholder="Full Name" class="input-field" required>
+        <input type="email" name="email" placeholder="Email Address" class="input-field" required>
+      </div>
+      <div class="input-grid">
+        <input type="password" name="password" placeholder="System Password (min 8 chars)" class="input-field" required minlength="8">
+        <input type="text" name="subject" placeholder="Primary Subject (e.g. Physics)" class="input-field" required>
+      </div>
+      <input type="text" name="classesInput" placeholder="Assigned Classes (comma separated: 5A, 6B, 8C)" class="input-field" required style="margin-bottom: 20px;">
+      
+      <button type="submit" class="btn btn-primary">Create Teacher Account</button>
+    </form>
+  </div>
+
+  <div class="table-wrapper">
+    <div style="margin-bottom: 25px;">
+      <h3 style="font-size: 1.3rem; color: #1e3a8a;">Faculty Directory</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">View and modify teacher profiles and permissions.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Profile</th>
+          <th>Name & Email</th>
+          <th>Subject</th>
+          <th>Classes</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!teachers || teachers.length === 0) { %>
+          <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">No faculty members found.</td></tr>
+        <% } else { %>
+          <% teachers.forEach(function(teacher, index){ %>
+            <tr>
+              <td style="width: 70px;">
+                <img src="<%= teacher.profilePhoto ? teacher.profilePhoto : '/images/default-avatar.png' %>" class="teacher-photo" alt="Profile">
+              </td>
+              <td>
+                <div style="font-weight: 700; color: var(--text-main);"><%= teacher.name %></div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);"><%= teacher.email %></div>
+              </td>
+              <td><span style="font-weight: 600; color: var(--primary);"><%= teacher.subject || "Not Assigned" %></span></td>
+              <td>
+                <% if (teacher.classes && teacher.classes.length > 0) { %>
+                  <% teacher.classes.forEach(function(cls) { %>
+                    <span class="badge"><%= cls %></span>
+                  <% }) %>
+                <% } else { %>
+                  <span style="color: var(--text-muted); font-style: italic;">None</span>
+                <% } %>
+              </td>
+              <td style="text-align: right;">
+                <button class="action-btn btn-update" onclick="toggleUpdate(<%= index %>)">Update</button>
+                <form action="/admin/teachers/delete" method="POST" style="display:inline;">
+                  <input type="hidden" name="teacherId" value="<%= teacher._id %>">
+                  <button type="submit" class="action-btn btn-delete" onclick="return confirm('Delete this teacher?')">Delete</button>
+                </form>
+              </td>
+            </tr>
+
+            <tr id="updateRow-<%= index %>" class="update-row">
+              <td colspan="5" class="update-inner">
+                <form action="/admin/teachers/update" method="POST">
+                  <input type="hidden" name="teacherId" value="<%= teacher._id %>">
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <input type="text" name="newName" placeholder="New Name" class="input-field">
+                    <input type="email" name="newEmail" placeholder="New Email" class="input-field">
+                    <input type="password" name="newPassword" placeholder="New Password" class="input-field">
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" name="newSubject" placeholder="New Subject" class="input-field">
+                    <input type="text" name="newClassesInput" placeholder="New Classes (e.g. 10A, 11B)" class="input-field">
+                  </div>
+                  <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 25px; font-size: 0.9rem;">Save Changes</button>
+                    <button type="button" class="btn" onclick="toggleUpdate(<%= index %>)" style="background: #e2e8f0; color: #475569; padding: 10px 25px; font-size: 0.9rem;">Cancel</button>
+                  </div>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function toggleUpdate(index) {
+      const row = document.getElementById("updateRow-" + index);
+      if (!row) return;
+      row.style.display = (row.style.display === "table-row") ? "none" : "table-row";
+    }
+  </script>
+</body>
+</html>

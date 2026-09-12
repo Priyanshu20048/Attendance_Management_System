@@ -1,0 +1,253 @@
+<%
+  // ---------- SAFE USER ----------
+  const cu = typeof currentUser !== "undefined" ? currentUser : user;
+
+  let displayName = "Teacher";
+  let miniProfilePath = "";
+
+  if (cu) {
+    if (cu.name) displayName = String(cu.name);
+    if (cu.profilePhoto) {
+      const p = String(cu.profilePhoto).trim();
+      miniProfilePath = /^https?:\/\//i.test(p)
+        ? p
+        : (p.startsWith("/") ? p : "/" + p);
+    }
+  }
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - <%= displayName %></title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- 🔴 REQUIRED FOR SOCKET -->
+<meta name="teacher-id" content="<%= cu ? cu._id : '' %>">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary:#2563eb;
+    --bg:#f8fafc;
+    --sidebar:#ffffff;
+    --text-main:#0f172a;
+    --text-muted:#64748b;
+    --border:#e2e8f0;
+    --present:#22c55e;
+    --absent:#ef4444;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-main)}
+
+  .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+
+  /* SIDEBAR */
+  .sidebar{
+    background:var(--sidebar);
+    border-right:1px solid var(--border);
+    padding:40px 24px;
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh
+  }
+
+  .profile-section{text-align:center;margin-bottom:40px}
+
+  .avatar{
+    width:80px;height:80px;border-radius:24px;
+    object-fit:cover;margin-bottom:15px;
+    border:3px solid var(--bg);
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.1)
+  }
+
+  .avatar-placeholder{
+    width:80px;height:80px;border-radius:24px;
+    background:var(--primary);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:32px;font-weight:700;margin:0 auto 15px
+  }
+
+  .teacher-name{font-weight:800;font-size:1.1rem}
+  .subject-tag{
+    font-size:.8rem;color:var(--primary);
+    font-weight:700;background:#eff6ff;
+    padding:4px 12px;border-radius:8px;
+    margin-top:6px;display:inline-block
+  }
+
+  .nav-menu{margin-top:20px;flex-grow:1}
+  .nav-link{
+    display:flex;align-items:center;
+    padding:12px 16px;text-decoration:none;
+    color:var(--text-muted);font-weight:600;
+    border-radius:12px;margin-bottom:5px
+  }
+  .nav-link.active{background:#f1f5f9;color:var(--primary)}
+
+  /* MAIN */
+  .main-content{padding:40px;max-width:1100px;margin:0 auto;width:100%}
+
+  .header-flex{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+  .header-flex h2{font-size:1.8rem;font-weight:800}
+
+  .filter-card{
+    background:#fff;padding:20px;border-radius:20px;
+    border:1px solid var(--border);margin-bottom:30px;
+    display:flex;gap:10px;align-items:center
+  }
+
+  select,input[type="date"]{
+    padding:10px 15px;border-radius:10px;
+    border:1px solid var(--border);
+    font-family:inherit;font-weight:600;
+    background:#f8fafc
+  }
+
+  .btn{
+    padding:10px 20px;border-radius:10px;
+    font-weight:700;border:none;cursor:pointer
+  }
+  .btn-primary{background:var(--text-main);color:#fff}
+  .btn-success{background:var(--present);color:#fff}
+
+  .table-card{
+    background:#fff;border-radius:20px;
+    border:1px solid var(--border);
+    overflow:hidden;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.05)
+  }
+
+  table{width:100%;border-collapse:collapse}
+  th{
+    background:#f8fafc;padding:15px;text-align:left;
+    font-size:.75rem;text-transform:uppercase;
+    color:var(--text-muted);border-bottom:1px solid var(--border)
+  }
+  td{padding:16px 15px;border-bottom:1px solid var(--border);font-weight:600}
+
+  .status-pill{
+    padding:4px 10px;border-radius:8px;
+    font-size:.75rem;font-weight:800
+  }
+  .status-present{background:#dcfce7;color:#166534}
+  .status-absent{background:#fee2e2;color:#991b1b}
+
+  .mark-btn-group{display:flex;gap:6px;justify-content:flex-end}
+  .mark-btn{
+    padding:6px 12px;border-radius:8px;
+    font-size:.8rem;font-weight:700;
+    border:1px solid var(--border);
+    background:#fff;cursor:pointer
+  }
+  .mark-btn.p:hover{background:var(--present);color:#fff}
+  .mark-btn.a:hover{background:var(--absent);color:#fff}
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="profile-section">
+    <% if (miniProfilePath) { %>
+      <img src="<%= miniProfilePath %>" class="avatar">
+    <% } else { %>
+      <div class="avatar-placeholder"><%= displayName.charAt(0).toUpperCase() %></div>
+    <% } %>
+    <div class="teacher-name"><%= displayName %></div>
+    <div class="subject-tag"><%= subject %></div>
+  </div>
+
+  <div class="nav-menu">
+    <a class="nav-link active" href="/teacher/dashboard">📊 Dashboard</a>
+    <a class="nav-link" href="/teacher/attendance/range">📅 History</a>
+    <a class="nav-link" href="/teacher/profile">👤 Profile</a>
+  </div>
+
+  <a class="nav-link" href="/logout" style="color:var(--absent);margin-top:auto">🚪 Logout</a>
+</aside>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <div class="header-flex">
+    <div>
+      <h2>Daily Attendance</h2>
+      <p style="color:var(--text-muted)">
+        Class: <%= selectedClass %> |
+        <%= new Date(selectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) %>
+      </p>
+    </div>
+
+    <form method="POST" action="/teacher/attendance/mark">
+      <input type="hidden" name="className" value="<%= selectedClass %>">
+      <input type="hidden" name="date" value="<%= selectedDate %>">
+      <input type="hidden" name="markAll" value="1">
+      <button class="btn btn-success">✓ Mark All Present</button>
+    </form>
+  </div>
+
+  <div class="filter-card">
+    <form method="GET" action="/teacher/dashboard" style="display:flex;gap:10px;width:100%">
+      <select name="className" style="flex:1">
+        <% classes.forEach(c=>{ %>
+          <option value="<%= c %>" <%= c===selectedClass?'selected':'' %>><%= c %></option>
+        <% }) %>
+      </select>
+      <input type="date" name="date" value="<%= selectedDate %>" max="<%= new Date().toISOString().split('T')[0] %>">
+      <button class="btn btn-primary">Load</button>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Roll</th>
+          <th>Student</th>
+          <th>Status</th>
+          <th style="text-align:right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% students.forEach(stu=>{
+        const rec = records.find(r=>r.studentId._id.toString()===stu._id.toString());
+        const status = rec ? rec.status : "Absent";
+      %>
+        <tr>
+          <td>#<%= stu.rollNo %></td>
+          <td><%= stu.name %></td>
+          <td>
+            <span class="status-pill <%= status==='Present'?'status-present':'status-absent' %>">
+              <%= status %>
+            </span>
+          </td>
+          <td style="text-align:right">
+            <form method="POST" action="/teacher/attendance/mark" class="mark-btn-group">
+              <input type="hidden" name="studentId" value="<%= stu._id %>">
+              <input type="hidden" name="className" value="<%= selectedClass %>">
+              <input type="hidden" name="date" value="<%= selectedDate %>">
+              <button name="status" value="Present" class="mark-btn p">P</button>
+              <button name="status" value="Absent" class="mark-btn a">A</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+
+<!-- 🔴 SOCKET FILES -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/teacher_socket.js"></script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report - <%= student ? student.name : "Student" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --present: #dcfce7;
+      --present-text: #166534;
+      --absent: #fee2e2;
+      --absent-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      padding: 40px 20px;
+    }
+
+    .report-container { max-width: 900px; margin: 0 auto; background: white; padding: 50px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+    /* Header Section */
+    .header-flex { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 30px; margin-bottom: 30px; }
+    .title-area h1 { font-size: 1.8rem; font-weight: 800; color: #0f172a; }
+    .student-meta { color: var(--text-muted); font-weight: 600; margin-top: 5px; }
+    
+    .badge-row { display: flex; gap: 10px; margin-top: 15px; }
+    .badge { background: #f1f5f9; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; color: #475569; border: 1px solid var(--border); }
+
+    /* Cards */
+    .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .section-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
+
+    /* Calendar Styling */
+    .calendar-wrapper { margin-bottom: 40px; }
+    .calendar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 12px; }
+    .calendar-controls button { padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .calendar-controls button:hover { background: #f1f5f9; }
+    #monthLabel { font-weight: 800; color: var(--primary); }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+    .weekday { text-align: center; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; padding-bottom: 10px; }
+    .day { height: 60px; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+    .day.present { background: var(--present); color: var(--present-text); border-color: #bbf7d0; }
+    .day.absent { background: var(--absent); color: var(--absent-text); border-color: #fecaca; }
+    .day.empty { border: none; cursor: default; }
+    .day.today { box-shadow: 0 0 0 3px var(--primary); }
+
+    /* Table Styling */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 30px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    th { background: #f8fafc; padding: 15px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; text-align: left; }
+    td { padding: 15px; border-top: 1px solid var(--border); font-weight: 600; }
+    .percent-text { color: var(--primary); font-weight: 800; }
+
+    /* Action Buttons */
+    .actions { text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 15px; }
+    .btn { padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: 0.2s; border: none; font-size: 0.95rem; }
+    .btn-pdf { background: var(--text-main); color: white; }
+    .btn-back { background: white; color: var(--text-main); border: 1px solid var(--border); }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Chart area */
+    .chart-container { padding: 20px; border: 1px solid var(--border); border-radius: 16px; margin-top: 20px; }
+
+    /* Popup */
+    .popup { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .popup-card { background: white; padding: 30px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .popup-card h3 { margin-bottom: 10px; font-weight: 800; }
+    .close-btn { margin-top: 20px; width: 100%; padding: 12px; background: #f1f5f9; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div id="reportContent" class="report-container">
+    <div class="header-flex">
+      <div class="title-area">
+        <h1>Attendance Report</h1>
+        <div class="student-meta">
+          <%= student ? (student.name + " · Roll No :-" + student.rollNo) : "Student Records" %>
+        </div>
+        <div class="badge-row">
+          <span class="badge">Class: <%= student ? student.className : 'N/A' %></span>
+          <span class="badge">Period: <%= fromDate %> to <%= toDate %></span>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <% if(mode === "subject") { %>
+          <div class="badge" style="background: #eff6ff; color: var(--primary); border-color: #bfdbfe;">
+            Subject: <strong><%= subject %></strong>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if(mode === "subject"){ %>
+    <div class="calendar-wrapper">
+      <div class="section-title">Monthly Attendance Flow</div>
+      <div class="calendar-controls">
+        <button onclick="changeMonth(-1)">Previous</button>
+        <span id="monthLabel"></span>
+        <button onclick="changeMonth(1)">Next</button>
+      </div>
+      <div class="calendar-grid" id="calendar">
+        </div>
+    </div>
+    <% } %>
+
+    <% if(mode !== "subject"){ %>
+    <div class="section-card">
+      <div class="section-title">Academic Performance Summary</div>
+      <% if(subjectStats.length === 0){ %>
+        <p style="padding: 20px; color: var(--text-muted);">No attendance data found for this period.</p>
+      <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Subject Name</th>
+            <th>Lectures</th>
+            <th>Attended</th>
+            <th>Percentage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% subjectStats.forEach(s => { %>
+            <tr>
+              <td><%= s.subject %></td>
+              <td><%= s.totalLectures %></td>
+              <td><%= s.presentCount %></td>
+              <td class="percent-text"><%= s.percent.toFixed(1) %>%</td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <div class="section-title">Visual Analytics</div>
+      <div class="chart-container">
+        <canvas id="chart"></canvas>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-pdf" onclick="exportPDF()">Download PDF Report</button>
+    <a href="/admin/reports" class="btn btn-back">Go Back</a>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="popup-card">
+      <h3 id="popDate"></h3>
+      <div id="popStatusBadge" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 0.9rem;"></div>
+      <button class="close-btn" onclick="closePopup()">Dismiss</button>
+    </div>
+  </div>
+
+  <script>
+    const calendarData = <%- JSON.stringify(calendar || {}) %>;
+    const today = new Date().toISOString().split("T")[0];
+    let currentMonth = new Date("<%= fromDate %>");
+
+    function closePopup(){ document.getElementById("popup").style.display="none"; }
+
+    function openPopup(date, status){
+      document.getElementById("popDate").innerText = new Date(date).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric'});
+      const badge = document.getElementById("popStatusBadge");
+      badge.innerText = status;
+      badge.style.background = status === "Present" ? "#dcfce7" : "#fee2e2";
+      badge.style.color = status === "Present" ? "#166534" : "#991b1b";
+      document.getElementById("popup").style.display="flex";
+    }
+
+    function changeMonth(step){
+      currentMonth.setMonth(currentMonth.getMonth() + step);
+      renderCalendar();
+    }
+
+    function renderCalendar(){
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      document.getElementById("monthLabel").innerText = currentMonth.toLocaleString("default",{month:"long",year:"numeric"});
+
+      const grid = document.getElementById("calendar");
+      grid.innerHTML = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="weekday">${d}</div>`).join('');
+
+      const startDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for(let i=0; i<startDay; i++) grid.innerHTML += `<div class="day empty"></div>`;
+
+      for(let d=1; d<=daysInMonth; d++){
+        const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        const status = calendarData[dateStr] || "Absent";
+        const isToday = dateStr === today ? "today" : "";
+        grid.innerHTML += `<div class="day ${status.toLowerCase()} ${isToday}" onclick="openPopup('${dateStr}','${status}')">${d}</div>`;
+      }
+    }
+
+    <% if(mode === "subject") { %> renderCalendar(); <% } %>
+  </script>
+
+  <% if(mode !== "subject" && subjectStats.length > 0){ %>
+  <script>
+    const ctx = document.getElementById("chart").getContext('2d');
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: <%- JSON.stringify(subjectStats.map(s=>s.subject)) %>,
+        datasets: [{
+          label: "Attendance Percentage",
+          data: <%- JSON.stringify(subjectStats.map(s=>s.percent)) %>,
+          backgroundColor: '#2563eb',
+          borderRadius: 8,
+          barThickness: 30
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+  <% } %>
+
+  <script>
+    async function exportPDF(){
+      const btn = document.querySelector('.btn-pdf');
+      btn.innerText = "Generating...";
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p","mm","a4");
+      const canvas = await html2canvas(document.getElementById("reportContent"), { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`Attendance_Report_<%= student ? student.rollNo : 'Student' %>.pdf`);
+      btn.innerText = "Download PDF Report";
+    }
+  </script>
+</body>
+</html>

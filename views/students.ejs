@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Management | Attendify</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --sidebar-blue: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
+      --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      --bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); padding: 40px; line-height: 1.6; }
+
+    /* Header Styling */
+    .page-header { max-width: 1100px; margin: 0 auto 40px; }
+    .title { font-size: 2.2rem; font-weight: 800; color: #1e3a8a; letter-spacing: -0.02em; }
+    .subtitle { color: var(--text-muted); font-size: 1rem; margin-top: 5px; }
+
+    /* Navigation Bar */
+    .top-bar { max-width: 1100px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .back-btn {
+      display: flex; align-items: center; gap: 8px; padding: 12px 24px;
+      background: white; border: 1px solid var(--border); border-radius: 50px;
+      text-decoration: none; color: var(--text-main); font-weight: 600; transition: 0.3s;
+      box-shadow: var(--shadow);
+    }
+    .back-btn:hover { background: #f1f5f9; transform: translateX(-5px); }
+
+    /* Stats Display */
+    .stats-container { display: flex; gap: 20px; }
+    .stat-card {
+      background: var(--sidebar-blue); color: white; padding: 15px 25px;
+      border-radius: 18px; text-align: center; min-width: 140px; box-shadow: 0 10px 20px rgba(30,58,138,0.2);
+    }
+    .stat-card h4 { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-card p { font-size: 1.6rem; font-weight: 800; }
+
+    /* Glass Cards */
+    .form-container, .table-container {
+      background: white; border-radius: 24px; border: 1px solid var(--border);
+      padding: 35px; max-width: 1100px; margin: 0 auto 30px; box-shadow: var(--shadow);
+    }
+    .form-container h3 { font-size: 1.3rem; margin-bottom: 20px; color: #1e3a8a; font-weight: 700; }
+
+    /* Input Styling */
+    .input-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+    .input-field, .search-input {
+      width: 100%; padding: 14px 20px; border-radius: 12px; border: 1.5px solid var(--border);
+      background: #f8fafc; outline: none; transition: 0.3s; font-family: inherit;
+    }
+    .input-field:focus, .search-input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+
+    /* Buttons */
+    .btn {
+      padding: 14px 28px; border-radius: 12px; border: none; font-weight: 700;
+      cursor: pointer; transition: 0.3s; font-family: inherit;
+    }
+    .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); width: 100%; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); }
+
+    /* Modern Table */
+    table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    th { padding: 15px; text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+    td { padding: 18px 15px; background: #f8fafc; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    td:first-child { border-left: 1px solid var(--border); border-radius: 15px 0 0 15px; font-weight: 700; }
+    td:last-child { border-right: 1px solid var(--border); border-radius: 0 15px 15px 0; }
+    tr:hover td { background: #f1f5f9; }
+
+    /* Action Inputs in Table */
+    .update-input { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; width: 100px; margin-right: 5px; }
+    .action-btn { 
+      padding: 8px 16px; border-radius: 8px; border: none; font-size: 0.85rem; 
+      font-weight: 600; cursor: pointer; transition: 0.2s; 
+    }
+    .btn-update { background: #dcfce7; color: #166534; }
+    .btn-delete { background: #fee2e2; color: #991b1b; }
+    .btn-update:hover { background: #bbf7d0; }
+    .btn-delete:hover { background: #fecaca; }
+
+    /* Bulk Grid */
+    .bulk-table { width: 100%; margin-bottom: 15px; }
+    .bulk-input { padding: 10px; border-radius: 8px; border: 1px solid var(--border); width: 100%; outline: none; }
+
+    /* Alerts */
+    .alert { padding: 15px; border-radius: 12px; margin: 0 auto 20px; max-width: 1100px; text-align: center; font-weight: 600; }
+    .error { background: #fee2e2; color: #b91c1c; }
+    .success { background: #dcfce7; color: #15803d; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="title">Student Management</div>
+    <div class="subtitle">Enroll new students or manage existing records across the institution.</div>
+  </div>
+
+  <div class="top-bar">
+    <a href="/admin/dashboard" class="back-btn">← Back to Dashboard</a>
+    <% 
+      var totalStudents = students.length;
+      var classNames = students.map(function(s){ return s.className; });
+      var uniqueClasses = Array.from(new Set(classNames)).length;
+    %>
+    <div class="stats-container">
+      <div class="stat-card"><h4>Students</h4><p><%= totalStudents %></p></div>
+      <div class="stat-card"><h4>Classes</h4><p><%= uniqueClasses %></p></div>
+    </div>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %> <div class="alert error"><%= error %></div> <% } %>
+  <% if (typeof success !== 'undefined' && success) { %> <div class="alert success"><%= success %></div> <% } %>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1100px; margin: 0 auto 30px;">
+    
+    <div class="form-container" style="margin: 0; width: 100%;">
+      <h3>Quick Add</h3>
+      <form action="/admin/students/add" method="POST">
+        <input type="text" name="name" placeholder="Full Name" class="input-field" required style="margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" name="rollNo" placeholder="Roll No" class="input-field" required>
+            <input type="text" name="className" placeholder="Class (e.g. 10A)" class="input-field" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Student</button>
+      </form>
+    </div>
+
+    <div class="form-container" style="margin: 0; width: 100%; background: var(--sidebar-blue); color: white;">
+        <h3 style="color: white;">Bulk Enrollment</h3>
+        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">Use the table below to add multiple students at once. Ensure class names follow the format 1A-12D.</p>
+        <button onclick="document.getElementById('bulk-section').scrollIntoView({behavior: 'smooth'})" class="btn" style="background: rgba(255,255,255,0.2); color: white; width: 100%;">Go to Bulk Entry</button>
+    </div>
+  </div>
+
+  <div id="bulk-section" class="form-container">
+    <h3>Bulk Data Entry</h3>
+    <form id="bulkForm" action="/admin/students/add" method="POST">
+      <input type="hidden" name="bulkData" id="bulkData">
+      <table class="bulk-table" id="bulkTable">
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Student Name</th>
+            <th>Roll No</th>
+            <th>Class</th>
+          </tr>
+        </thead>
+        <tbody id="bulkBody">
+          <% for (var i = 1; i <= 5; i++) { %>
+            <tr>
+              <td><%= i %></td>
+              <td><input type="text" class="bulk-input" name="bulkName"></td>
+              <td><input type="text" class="bulk-input" name="bulkRoll"></td>
+              <td><input type="text" class="bulk-input" name="bulkClass"></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <button type="button" id="addRowBtn" class="btn" style="background: #f1f5f9; font-size: 0.9rem;">+ Add More Rows</button>
+        <button type="submit" class="btn btn-primary" style="width: auto; padding: 12px 40px;">Upload Bulk List</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+      <h3 style="margin: 0;">Student Directory</h3>
+      <input type="text" id="studentSearch" placeholder="Search by name, roll, or class..." class="search-input" style="max-width: 300px;">
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Roll No</th>
+          <th>Full Name</th>
+          <th>Class</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody">
+        <% if (!students || students.length === 0) { %>
+          <tr><td colspan="4" style="text-align: center; padding: 40px;">No records found.</td></tr>
+        <% } else { %>
+          <% students.forEach(function(student){ %>
+            <tr class="student-row">
+              <td><%= student.rollNo %></td>
+              <td><%= student.name %></td>
+              <td><span style="background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700;"><%= student.className %></span></td>
+              <td style="text-align: right;">
+                <form action="/admin/students/update" method="POST" style="display: inline-block;">
+                  <input type="hidden" name="studentId" value="<%= student._id %>">
+                  <input type="text" name="newRollNo" placeholder="Roll" class="update-input">
+                  <input type="text" name="newName" placeholder="Name" class="update-input">
+                  <button type="submit" class="action-btn btn-update">Update</button>
+                </form>
+                <form action="/admin/students/delete" method="POST" style="display: inline-block;">
+                  <input type="hidden" name="studentId" value="<%= student._id %>">
+                  <button type="submit" class="action-btn btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Bulk row logic
+    document.getElementById("addRowBtn").addEventListener("click", function () {
+      const tbody = document.getElementById("bulkBody");
+      const rowCount = tbody.rows.length;
+      const newRow = tbody.insertRow();
+      newRow.innerHTML = `
+        <td>${rowCount + 1}</td>
+        <td><input type="text" class="bulk-input" name="bulkName"></td>
+        <td><input type="text" class="bulk-input" name="bulkRoll"></td>
+        <td><input type="text" class="bulk-input" name="bulkClass"></td>
+      `;
+    });
+
+    // Bulk form processing
+    document.getElementById("bulkForm").addEventListener("submit", function (e) {
+      const rows = document.querySelectorAll("#bulkBody tr");
+      const data = [];
+      rows.forEach(row => {
+        const name = row.querySelector('input[name="bulkName"]').value.trim();
+        const roll = row.querySelector('input[name="bulkRoll"]').value.trim();
+        const cls = row.querySelector('input[name="bulkClass"]').value.trim();
+        if (name && roll && cls) data.push(`${name},${roll},${cls}`);
+      });
+      if (data.length === 0) {
+        e.preventDefault();
+        alert("Please fill at least one complete row.");
+      } else {
+        document.getElementById("bulkData").value = data.join("\n");
+      }
+    });
+
+    // Search Logic
+    document.getElementById("studentSearch").addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      document.querySelectorAll(".student-row").forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+      });
+    });
+  </script>
+</body>
+</html>

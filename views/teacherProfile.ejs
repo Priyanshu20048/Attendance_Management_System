@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Profile - Settings</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --sidebar: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+    }
+
+    .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+    /* SIDEBAR (Dashboard ke sath consistent) */
+    .sidebar { 
+      background: var(--sidebar); border-right: 1px solid var(--border); 
+      padding: 40px 24px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+    }
+    .profile-card { text-align: center; margin-bottom: 30px; }
+    .avatar-large { 
+      width: 120px; height: 120px; border-radius: 30px; object-fit: cover; 
+      margin-bottom: 15px; border: 4px solid var(--bg); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .avatar-placeholder { 
+      width: 120px; height: 120px; border-radius: 30px; background: var(--primary); 
+      color: white; display: flex; align-items: center; justify-content: center; 
+      font-size: 40px; font-weight: 700; margin: 0 auto 15px;
+    }
+    .nav-link { 
+      display: flex; align-items: center; padding: 12px 16px; text-decoration: none; 
+      color: var(--text-muted); font-weight: 600; border-radius: 12px; margin-bottom: 5px; transition: 0.2s;
+    }
+    .nav-link:hover { background: #f1f5f9; color: var(--primary); }
+
+    /* CONTENT AREA */
+    .content-area { padding: 40px; max-width: 800px; }
+    .page-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+    .page-subtitle { color: var(--text-muted); margin-bottom: 30px; font-weight: 500; }
+
+    .settings-card { 
+      background: white; border-radius: 24px; padding: 35px; 
+      border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    /* FORM STYLING */
+    .form-group { margin-bottom: 20px; }
+    .field-label { 
+      display: block; font-size: 0.85rem; font-weight: 700; 
+      color: var(--text-main); margin-bottom: 8px; 
+    }
+    .input-field { 
+      width: 100%; padding: 12px 16px; border-radius: 12px; 
+      border: 1.5px solid var(--border); background: #fcfcfc; 
+      font-family: inherit; font-size: 0.95rem; font-weight: 600; transition: 0.2s;
+    }
+    .input-field:focus { 
+      border-color: var(--primary); outline: none; background: white;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .info-box { 
+      background: #f1f5f9; padding: 12px; border-radius: 12px; 
+      font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;
+    }
+
+    .btn-save { 
+      background: var(--text-main); color: white; padding: 14px 28px; 
+      border-radius: 12px; border: none; font-weight: 700; font-size: 1rem; 
+      cursor: pointer; transition: 0.2s; margin-top: 10px; width: 100%;
+    }
+    .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .checkbox-container {
+      display: flex; align-items: center; gap: 8px; margin-top: 10px;
+      font-size: 0.85rem; font-weight: 600; color: var(--danger);
+    }
+
+    .alert { 
+      padding: 14px 20px; border-radius: 12px; margin-bottom: 25px; 
+      font-weight: 600; font-size: 0.9rem; border-left: 5px solid transparent;
+    }
+    .alert.success { background: #dcfce7; color: #166534; border-color: #22c55e; }
+    .alert.error { background: #fee2e2; color: #991b1b; border-color: #ef4444; }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="profile-card">
+      <% 
+        let avatarSrc = '/images/default-avatar.png';
+        if (user && user.profilePhoto) {
+          let p = String(user.profilePhoto || '').trim();
+          avatarSrc = /^https?:\/\//i.test(p) ? p : (p.startsWith('/') ? p : '/' + p);
+        }
+      %>
+      <% if (user && user.profilePhoto) { %>
+        <img src="<%= avatarSrc %>" alt="Profile" class="avatar-large" onerror="this.src='/images/default-avatar.png'">
+      <% } else { %>
+        <div class="avatar-placeholder"><%= user ? user.name.charAt(0).toUpperCase() : 'T' %></div>
+      <% } %>
+      <div style="font-weight: 800; font-size: 1.1rem;"><%= user ? user.name : 'Teacher' %></div>
+      <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">Teacher ID: <%= user._id.toString().slice(-6) %></div>
+    </div>
+
+    <nav style="flex-grow: 1;">
+      <a href="/teacher/dashboard" class="nav-link">📊 Dashboard</a>
+      <a href="/teacher/attendance/range" class="nav-link">📅 History Range</a>
+      <a href="/teacher/profile" class="nav-link" style="color: var(--primary); background: #f1f5f9;">👤 Profile Settings</a>
+    </nav>
+
+    <a href="/logout" class="nav-link" style="color: var(--danger); margin-top: auto;">🚪 Logout</a>
+  </aside>
+
+  <main class="content-area">
+    <h1 class="page-title">Profile Settings</h1>
+    <p class="page-subtitle">Update your personal information and profile picture.</p>
+
+    <% if (error) { %><div class="alert error">⚠️ <%= error %></div><% } %>
+    <% if (success) { %><div class="alert success">✨ <%= success %></div><% } %>
+
+    <div class="settings-card">
+      <form action="/teacher/profile" method="POST" enctype="multipart/form-data">
+        
+        <div class="form-group">
+          <label class="field-label">Full Name</label>
+          <input type="text" name="name" class="input-field" value="<%= user ? user.name : '' %>" required>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">Email Address</label>
+          <input type="email" name="email" class="input-field" value="<%= user ? user.email : '' %>" required>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">Assignment Details (Read-only)</label>
+          <div class="info-box">
+            <strong>Subject:</strong> <%= user.subject || '-' %><br>
+            <strong>Classes:</strong> <%= (user.classes && user.classes.length) ? user.classes.join(", ") : '-' %>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
+
+        <div class="form-group">
+          <label class="field-label">Security</label>
+          <input type="password" name="password" class="input-field" placeholder="Change password (leave blank to keep current)">
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">Upload New Photo</label>
+          <input type="file" name="profilePhoto" class="input-field" accept="image/*" style="padding: 8px;">
+          
+          <% if (user.profilePhoto) { %>
+            <label class="checkbox-container">
+              <input type="checkbox" name="removePhoto" value="1" style="width: 16px; height: 16px;"> 
+              Remove current profile picture
+            </label>
+          <% } %>
+        </div>
+
+        <button type="submit" class="btn-save">Save Profile Changes</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

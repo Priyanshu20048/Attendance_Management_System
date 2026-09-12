@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>History - Class <%= className %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --present: #22c55e;
+      --absent: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Page Header */
+    .page-header { margin-bottom: 30px; text-align: center; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 800; }
+    .page-header p { color: var(--text-muted); font-weight: 500; margin-top: 5px; }
+
+    /* Filter Bar */
+    .filter-card {
+      background: white; border-radius: 20px; padding: 25px;
+      border: 1px solid var(--border); margin-bottom: 30px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px; align-items: flex-end;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 8px; }
+    .filter-group label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+    
+    select, input[type="date"] {
+      padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+      font-family: inherit; font-size: 0.9rem; font-weight: 600; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--primary); }
+
+    .btn-view {
+      background: var(--text-main); color: white; padding: 12px;
+      border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-view:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Data Matrix Table */
+    .table-card {
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04);
+    }
+    .table-wrapper { width: 100%; overflow-x: auto; position: relative; }
+    
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    
+    th {
+      background: #f8fafc; padding: 15px; font-size: 0.75rem; 
+      font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+      border-bottom: 2px solid var(--border); text-align: center;
+      position: sticky; top: 0; z-index: 10;
+    }
+    
+    .sticky-col {
+      position: sticky; left: 0; background: white; z-index: 5;
+      border-right: 2px solid var(--border); text-align: left !important;
+      min-width: 200px;
+    }
+
+    td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; text-align: center; }
+    tr:hover td { background-color: #f1f5f9; }
+    tr:hover .sticky-col { background-color: #f1f5f9; }
+
+    /* Status Icons */
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .bg-p { background: var(--present); box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+    .bg-a { background: var(--absent); box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+
+    .alert { padding: 15px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; margin-bottom: 25px; text-align: center; }
+    .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 30px;
+      color: var(--text-muted); font-weight: 700; text-decoration: none; font-size: 0.9rem;
+    }
+    .back-btn:hover { color: var(--primary); }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <header class="page-header">
+    <h1>Class History Matrix</h1>
+    <p>Viewing attendance trends for <strong>Class <%= className || "Select Class" %></strong></p>
+  </header>
+
+  <div class="filter-card">
+    <form class="filter-grid" method="GET" action="/teacher/attendance/range">
+      <div class="filter-group">
+        <label>Select Class</label>
+        <select name="className">
+          <% if (typeof user !== 'undefined' && user.classes) { %>
+            <% user.classes.forEach(c => { %>
+              <option value="<%= c %>" <%= c === className ? "selected" : "" %>><%= c %></option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>From Date</label>
+        <input type="date" id="fromDate" name="fromDate" value="<%= fromDate || '' %>">
+      </div>
+
+      <div class="filter-group">
+        <label>To Date</label>
+        <input type="date" id="toDate" name="toDate" value="<%= toDate || '' %>">
+      </div>
+
+      <button type="submit" class="btn-view">Generate Report</button>
+    </form>
+  </div>
+
+  <% if (!fromDate && !toDate && !error) { %>
+    <div class="alert alert-info">👋 Please select a date range to view the attendance matrix.</div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert alert-error">⚠️ <%= error %></div>
+  <% } %>
+
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="sticky-col">Student Information</th>
+            <% if (dates && dates.length > 0) { %>
+              <% dates.forEach(function(d){ %>
+                <th><%= d.split('-').slice(1).join('/') %></th>
+              <% }) %>
+            <% } else { %>
+              <th>Timeline</th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!records || records.length === 0 || !dates || dates.length === 0) { %>
+            <tr>
+              <td colspan="100" style="padding: 50px; color: var(--text-muted);">No records found for this selection.</td>
+            </tr>
+          <% } else { %>
+            <% records.forEach(function(item){ %>
+              <tr>
+                <td class="sticky-col">
+                  <div style="font-size: 0.9rem;"><%= item.student.name %></div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Roll: #<%= item.student.rollNo %></div>
+                </td>
+                <% dates.forEach(function(d){ 
+                     var st = (item.attendance && item.attendance[d]) || "Absent";
+                %>
+                  <td>
+                    <div class="status-dot <%= st === 'Present' ? 'bg-p' : 'bg-a' %>" title="<%= d %>: <%= st %>"></div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;"><%= st === 'Present' ? 'P' : 'A' %></div>
+                  </td>
+                <% }) %>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <a href="/teacher/dashboard?className=<%= className %>" class="back-btn">← Back to Attendance Marking</a>
+</div>
+
+<script>
+  // Disable future dates
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("fromDate").max = today;
+  document.getElementById("toDate").max = today;
+</script>
+
+</body>
+</html>

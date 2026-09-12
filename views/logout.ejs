@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logging Out...</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --text: #0f172a;
+    }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+    .logout-card {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+      max-width: 400px;
+      width: 90%;
+    }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; }
+    p { color: #64748b; font-weight: 500; font-size: 0.95rem; }
+    
+    .exit-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+        display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logout-card">
+  <span class="exit-icon">🚪</span>
+  <div class="loader"></div>
+  <h1>Logging Out</h1>
+  <p>Securing your session and redirecting you to the login page...</p>
+</div>
+
+<script>
+  // Logout logic: 2 seconds wait karke login par bhej dega
+  setTimeout(() => {
+    window.location.href = "/login"; 
+  }, 2500);
+</script>
+
+</body>
+</html>

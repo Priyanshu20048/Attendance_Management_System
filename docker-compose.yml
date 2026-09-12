@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_ENABLED=true
+      - SESSION_SECRET=${SESSION_SECRET}
+      - PORT=3000
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"

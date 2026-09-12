@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AttendanceApp - Smart Attendance Management</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #e0f2ff;
+      --primary-dark: #1d4ed8;
+      --accent: #16a34a;
+      --bg-page: #f3f4f6;
+      --card-bg: #ffffff;
+      --border-soft: #e5e7eb;
+      --text-main: #0f172a;
+      --text-muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background:
+        radial-gradient(circle at top left, #e0f2ff 0, #ffffff 40%),
+        radial-gradient(circle at bottom right, #e5e7eb 0, #f9fafb 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Soft background grid */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(148, 163, 184, 0.10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 46px 46px;
+      opacity: 0.3;
+      z-index: -3;
+    }
+
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(191, 219, 254, 0.9), transparent 55%),
+        radial-gradient(circle at top right, rgba(219, 234, 254, 0.8), transparent 55%),
+        radial-gradient(circle at bottom, rgba(243, 244, 246, 0.9), rgba(249, 250, 251, 1));
+      z-index: -2;
+      opacity: 0.9;
+    }
+
+    .bg-orbit {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 40%, rgba(147, 197, 253, 0.4), transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(125, 211, 252, 0.35), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.5;
+      animation: orbitGlow 22s ease-in-out infinite alternate;
+      z-index: -1;
+    }
+
+    @keyframes orbitGlow {
+      0% { transform: translate3d(0,0,0); }
+      50% { transform: translate3d(-18px, 14px, 0); }
+      100% { transform: translate3d(10px, -10px, 0); }
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 52px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      animation: slideDown 0.7s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-18px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
+    }
+
+    .logo-orbit {
+      position: absolute;
+      inset: -4px;
+      border-radius: 999px;
+      background: conic-gradient(
+        from 210deg,
+        rgba(191, 219, 254, 0.6),
+        rgba(59, 130, 246, 0.9),
+        rgba(191, 219, 254, 0.6)
+      );
+      filter: blur(7px);
+      opacity: 0.9;
+      animation: spinOrbit 6s linear infinite;
+    }
+
+    @keyframes spinOrbit {
+      to { transform: rotate(360deg); }
+    }
+
+    .logo-icon {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 13px;
+      background: radial-gradient(circle at 30% 0%, #eff6ff, #60a5fa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #0f172a;
+      font-weight: 700;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.45);
+    }
+
+    .logo-text {
+      font-weight: 650;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111827;
+    }
+
+    .logo-sub {
+      font-size: 0.72rem;
+      color: #6b7280;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-badge {
+      font-size: 0.7rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      color: #4b5563;
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
+    }
+
+    .btn {
+      padding: 7px 20px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      color: #111827;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-outline:hover {
+      background: #eff6ff;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .btn-primary {
+      position: relative;
+      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      border-color: transparent;
+      color: #ffffff;
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.55);
+      overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.6), transparent, rgba(255,255,255,0.35));
+      transform: translateX(-120%);
+      animation: shimmer 2.7s infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { transform: translateX(-120%); }
+      50%  { transform: translateX(120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.03);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(37, 99, 235, 0.7);
+    }
+
+    /* Page wrapper */
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 110px 22px 40px;
+    }
+
+    /* Scroll animations */
+    [data-animate] {
+      opacity: 1;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    [data-animate].in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 40px;
+      align-items: center;
+      min-height: calc(100vh - 120px);
+      padding-top: 10px;
+      padding-bottom: 38px;
+      animation: heroEntry 0.9s ease-out both;
+    }
+    @keyframes heroEntry {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+    .hero-label-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hero-label-main {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1d4ed8;
+    }
+
+    .hero-label-main span.badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
+    }
+
+    .hero-label-secondary {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .hero h1 {
+      font-size: 2.7rem;
+      line-height: 1.05;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(to right, #1d4ed8, #38bdf8);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      max-width: 480px;
+    }
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid var(--border-soft);
+      font-size: 0.78rem;
+      color: #4b5563;
+
+    }
+    .pill:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+}
+
+
+    .pill-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #3b82f6;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .stat-item {
+      min-width: 120px;
+      padding: 10px 12px;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+    }
+    .stat-item:hover {
+  background: rgba(239, 246, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+  transform: translateY(-3px);}
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+      margin-bottom: 3px;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .stat-tag {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Hero right card */
+    .hero-shell {
+      position: relative;
+    }
+
+    .shell-orbit {
+      position: absolute;
+      inset: -18px;
+      border-radius: 28px;
+      background: conic-gradient(
+        from 220deg,
+        rgba(191, 219, 254, 0.7),
+        rgba(59, 130, 246, 0.15),
+        rgba(191, 219, 254, 0.7)
+      );
+      opacity: 0.75;
+      filter: blur(10px);
+    }
+
+    .hero-card {
+      position: relative;
+      background: #ffffff;
+      border-radius: 26px;
+      padding: 18px 18px 16px;
+      border: 1px solid var(--border-soft);
+      box-shadow:
+        0 18px 50px rgba(15, 23, 42, 0.10),
+        0 0 0 1px rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      animation: floatCard 7s ease-in-out infinite alternate;
+    }
+    .hero-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.18);
+}
+
+
+    @keyframes floatCard {
+      0%   { transform: translate3d(0,0,0); }
+      50%  { transform: translate3d(0,-6px,0); }
+      100% { transform: translate3d(0,2px,0); }
+    }
+
+    .hero-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .hero-card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .hero-card-pill {
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .hero-card-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #16a34a;
+    }
+
+    .hero-card-main {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .hero-card-attendance {
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      border-radius: 18px;
+      padding: 10px 12px;
+      border: 1px solid #dbeafe;
+    }
+
+    .hero-card-attendance h3 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .hero-card-attendance .percent {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      margin-bottom: 4px;
+    }
+
+    .hero-card-attendance .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 0.65rem;
+      font-weight: 500;
+    }
+
+    .hero-card-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .hero-card-list {
+      background: #f9fafb;
+      border-radius: 18px;
+      padding: 10px 11px;
+      border: 1px solid var(--border-soft);
+      font-size: 0.75rem;
+    }
+
+    .hero-card-list-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .hero-card-list-row:hover {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+    .hero-card-list-row + .hero-card-list-row {
+      border-top: 1px dashed #e5e7eb;
+      margin-top: 4px;
+      padding-top: 6px;
+    }
+
+    .badge-present, .badge-absent {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.64rem;
+      font-weight: 500;
+    }
+
+    .badge-present {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-absent {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .hero-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .hero-card-footer button {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #111827;
+      color: #ffffff;
+      transition: all 0.2s;
+    }
+
+    .hero-card-footer button:hover {
+      transform: translateY(-1px);
+      background: #000000;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 42px;
+    }
+
+    .section-head {
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .section-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      max-width: 520px;
+    }
+
+    /* Features strip */
+    .features {
+      padding: 18px 20px;
+      background: #f9fafb;
+      border-radius: 18px;
+      border: 1px solid var(--border-soft);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .feature {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .feature-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .feature-text {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* Workflow */
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .wf-step {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid var(--border-soft);
+      padding: 14px 14px 16px;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+      position: relative;
+      overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .wf-step:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+}
+
+    .wf-step::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background: radial-gradient(circle at top right, rgba(191, 219, 254, 0.8), transparent 55%);
+      transition: opacity 0.2s ease;
+    }
+
+    .wf-step:hover::after {
+      opacity: 1;
+    }
+
+    .wf-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .wf-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .wf-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .wf-tag {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    /* Roles */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .role-card {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid var(--border-soft);
+      padding: 16px 16px 14px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .role-card:hover {
+      transform: translateY(-4px);
+      border-color: #bfdbfe;
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    .role-chip {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .role-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .role-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .role-list {
+      font-size: 0.78rem;
+      color: #374151;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .role-list li::before {
+      content: "• ";
+      color: #2563eb;
+    }
+
+    /* Highlight strip */
+    .highlight-strip {
+      margin-top: 12px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, #eff6ff, #e0f2fe);
+      border: 1px solid #bfdbfe;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: #111827;
+    }
+
+    .highlight-strip span.accent {
+      font-weight: 600;
+      color: #1d4ed8;
+    }
+
+    /* CTA band */
+    .cta-band {
+      margin-top: 10px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      border: 1px solid #1d4ed8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: #eff6ff;
+    }
+
+    .cta-band-text {
+      font-size: 0.9rem;
+    }
+
+    .cta-band-text span {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ghost {
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+      padding: 7px 16px;
+      font-size: 0.8rem;
+      color: #ffffff;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15, 23, 42, 0.1);
+      border-color: #ffffff;
+    }
+
+    /* Footer */
+    .footer {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 22px 26px;
+      font-size: 0.75rem;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 950px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .hero-shell {
+        max-width: 380px;
+        margin: 8px auto 0;
+      }
+      .workflow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .roles-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .navbar {
+        padding: 10px 20px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .page {
+        padding: 96px 14px 24px;
+      }
+      .hero h1 {
+        font-size: 2.1rem;
+      }
+      .features {
+        grid-template-columns: 1fr;
+      }
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+      .roles-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background layers -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-orbit"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon-wrap">
+        <div class="logo-orbit"></div>
+        <div class="logo-icon">A</div>
+      </div>
+      <div>
+        <div class="logo-text">AttendanceApp</div>
+        <div class="logo-sub">Smart Attendance · College-ready</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-badge">
+        <span class="nav-dot"></span>
+        Demo institute · Active today
+      </div>
+      <a href="/login" class="btn btn-outline">Login</a>
+      <a href="/signup" class="btn btn-primary">Sign up</a>
+    </div>
+  </nav>
+
+  <main class="page">
+    <!-- Hero -->
+    <section class="hero" data-animate>
+      <div>
+        <div class="hero-label-row">
+          <div class="hero-label-main">
+            <span class="badge-dot"></span>
+            Attendance, without Excel chaos
+          </div>
+          <div class="hero-label-secondary">
+            Designed for teachers, admins & students
+          </div>
+        </div>
+
+        <h1>
+          Modern <span>Attendance</span><br />
+          for your entire institute.
+        </h1>
+
+        <p class="hero-subtitle">
+          Mark daily attendance in seconds, view accurate reports anytime,
+          and ensure every class record stays in one secure place.
+        </p>
+
+        <div class="hero-pills">
+          <div class="pill">
+            <span class="pill-dot"></span>
+            One-click daily attendance
+          </div>
+          <div class="pill">
+            <span class="pill-dot"></span>
+            Class-wise & date-wise analytics
+          </div>
+          <div class="pill">
+            <span class="pill-dot"></span>
+            Works in any lab or browser
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="/login" class="btn btn-primary">Go to Dashboard</a>
+          <a href="/signup" class="btn btn-outline">Create Teacher Account</a>
+        </div>
+
+        <p class="hero-note">
+          No installation needed — log in, select your class, and start marking today's attendance.
+        </p>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-label">Classes Today</div>
+            <div class="stat-value">06</div>
+            <div class="stat-tag">Based on current timetable</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Avg. Attendance</div>
+            <div class="stat-value">93%</div>
+            <div class="stat-tag">Real-time across all batches</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value">180+</div>
+            <div class="stat-tag">Tracked within your institute</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right mock dashboard card -->
+      <div class="hero-shell">
+        <div class="shell-orbit"></div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <div class="hero-card-title">Today’s Attendance Snapshot</div>
+            <div class="hero-card-pill">
+              <span class="hero-card-pill-dot"></span>
+              Live · 09:10 AM
+            </div>
+          </div>
+
+          <div class="hero-card-main">
+            <div class="hero-card-attendance">
+              <h3>Today</h3>
+              <div class="percent">95%</div>
+              <div class="chip">
+                ▲ 4.2% vs yesterday
+              </div>
+              <div class="hero-card-meta">
+                171 present · 9 absent · 3 classes left
+              </div>
+            </div>
+
+            <div class="hero-card-list">
+              <div class="hero-card-list-row">
+                <span>SE - A · 10:00 AM</span>
+                <span class="badge-present">Present 94%</span>
+              </div>
+              <div class="hero-card-list-row">
+                <span>SE - B · 11:00 AM</span>
+                <span class="badge-present">Present 92%</span>
+              </div>
+              <div class="hero-card-list-row">
+                <span>SE - C · 12:00 PM</span>
+                <span class="badge-absent">Low 81%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-card-footer">
+            <span>Auto-saves after every class · Secure & reliable.</span>
+            <button type="button">Preview Class View</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features strip -->
+    <section data-animate>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-label">For Teachers</div>
+          <div class="feature-text">
+            Mark attendance for each lecture on a single screen, switch classes quickly and download clean reports without Excel juggling.
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-label">For Admins</div>
+          <div class="feature-text">
+            Institute-level overview of classes, subjects and low-attendance students to keep policies under control.
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-label">For Students</div>
+          <div class="feature-text">
+            Clear subject-wise percentages so students know where they stand before exams, submissions or eligibility checks.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section data-animate>
+      <div class="section-head">
+        <h2 class="section-title">How AttendanceApp fits into a real classroom</h2>
+        <p class="section-subtitle">
+          A simple 3-step flow matching how teachers actually take attendance every day.
+        </p>
+      </div>
+
+      <div class="workflow">
+        <div class="wf-step">
+          <div class="wf-badge">1</div>
+          <div class="wf-title">Select class & subject</div>
+          <p class="wf-text">
+            Choose the course, division and lecture slot from your timetable in a couple of clicks — no complex setup required.
+          </p>
+          <span class="wf-tag">Takes ~10s</span>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-badge">2</div>
+          <div class="wf-title">Mark present / absent</div>
+          <p class="wf-text">
+            Mark each student with a single tap. Keyboard shortcuts help you complete roll call even in a busy lecture.
+          </p>
+          <span class="wf-tag">No proxy confusion</span>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-badge">3</div>
+          <div class="wf-title">Instant accurate reports</div>
+          <p class="wf-text">
+            Class-wise and student-wise percentages are calculated automatically and stay available whenever you need them.
+          </p>
+          <span class="wf-tag">Auto-calculated</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roles / Personas -->
+    <section data-animate>
+      <div class="section-head">
+        <h2 class="section-title">Role-based access for your institute</h2>
+        <p class="section-subtitle">
+          Different dashboards for teachers, admins and students — so everyone only sees what they actually need.
+        </p>
+      </div>
+
+      <div class="roles-grid">
+        <div class="role-card">
+          <div class="role-chip">Teacher View</div>
+          <div class="role-title">Class-wise control</div>
+          <p class="role-text">
+            Perfect for daily use between lectures, even when you’re switching rooms or devices.
+          </p>
+          <ul class="role-list">
+            <li>Mark attendance for each lecture</li>
+            <li>View student history per subject</li>
+            <li>Download class-wise reports</li>
+          </ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-chip">Admin View</div>
+          <div class="role-title">Institute overview</div>
+          <p class="role-text">
+            Spot attendance issues quickly and keep every department aligned with rules.
+          </p>
+          <ul class="role-list">
+            <li>Monitor low-attendance students</li>
+            <li>Filter by course, batch or teacher</li>
+            <li>Export institute-level analytics</li>
+          </ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-chip">Student View</div>
+          <div class="role-title">Transparent records</div>
+          <p class="role-text">
+            No surprises — students can plan attendance before exam eligibility or submissions.
+          </p>
+          <ul class="role-list">
+            <li>Check subject-wise percentage</li>
+            <li>See day-wise history</li>
+            <li>Track how many lectures are safe to miss</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="highlight-strip">
+        <span>
+          <span class="accent">Reduce manual work</span> for teachers while still giving admins and students the clarity they need.
+        </span>
+        <span>Ready to try it in your next lecture?</span>
+      </div>
+    </section>
+
+    <!-- CTA band -->
+    <section data-animate>
+      <div class="cta-band">
+        <div class="cta-band-text">
+          Start tracking attendance with <span>zero setup</span>. Just sign in, add your first class and you’re ready.
+        </div>
+        <div class="cta-actions">
+          <a href="/signup" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">
+            Create free account
+          </a>
+          <button class="btn-ghost" type="button" onclick="location.href='/login'">
+            Already using? Login
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <%= new Date().getFullYear() %> AttendanceApp. All rights reserved.</span>
+    <span>Built for modern college attendance management.</span>
+  </footer>
+
+  <!-- Scroll animation JS -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('[data-animate]').forEach((el) => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

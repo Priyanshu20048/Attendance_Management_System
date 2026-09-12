@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attendance Reports | Attendify</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f3f4f6; /* Soft light grey background */
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    /* Header */
+    .header { margin-bottom: 40px; }
+    .title { font-size: 2rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px; 
+      padding: 10px 20px; background: white; border: 1px solid var(--border);
+      border-radius: 12px; text-decoration: none; color: var(--text-main);
+      font-weight: 600; font-size: 0.9rem; transition: 0.2s; margin-bottom: 30px;
+    }
+    .back-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+    /* Section Heading */
+    .section-label {
+      font-size: 0.85rem; font-weight: 700; color: var(--primary);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 20px; display: block;
+    }
+
+    /* Grid Layout */
+    .reports-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px; margin-bottom: 50px;
+    }
+
+    /* Clean White Card */
+    .card {
+      background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border);
+      padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
+    .card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 25px; line-height: 1.5; }
+
+    /* Form Elements */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .input-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 6px; color: #475569; }
+    
+    .input-field {
+      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+      background: #fcfcfc; font-family: inherit; font-size: 0.9rem; outline: none; transition: 0.2s;
+    }
+    .input-field:focus { border-color: var(--primary); background: white; }
+
+    .btn-generate {
+      width: 100%; padding: 14px; border-radius: 10px; border: none;
+      background: var(--primary); color: white; font-weight: 700; font-size: 0.95rem;
+      cursor: pointer; transition: 0.2s; margin-top: 10px;
+    }
+    .btn-generate:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+    /* Small Info Box */
+    .info-tag {
+      background: #f1f5f9; color: #475569; padding: 10px; border-radius: 8px;
+      font-size: 0.8rem; margin-top: 10px; border-left: 3px solid #cbd5e1;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <a href="/admin/dashboard" class="back-btn">← Dashboard</a>
+
+    <div class="header">
+      <div class="title">Attendance Reports</div>
+      <div class="subtitle">Select a report type and date range to view attendance analytics.</div>
+    </div>
+
+    <span class="section-label">General Reports</span>
+    <div class="reports-grid">
+      
+      <div class="card">
+        <h3>Student Profile</h3>
+        <p>Get a detailed breakdown of attendance for a specific student.</p>
+        
+        <form action="/admin/reports/student" method="POST">
+          <div class="form-row">
+            <div class="input-group">
+              <label>Roll Number</label>
+              <input type="text" name="rollNo" placeholder="101" class="input-field" required>
+            </div>
+            <div class="input-group">
+              <label>Class</label>
+              <input type="text" name="className" placeholder="10A" class="input-field" required>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Subject (Optional)</label>
+            <input type="text" name="subject" placeholder="e.g. Maths" class="input-field">
+          </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label>From</label>
+              <input type="date" name="fromDate" class="input-field" required>
+            </div>
+            <div class="input-group">
+              <label>To</label>
+              <input type="date" name="toDate" class="input-field" required>
+            </div>
+          </div>
+          <button class="btn-generate">Generate Report</button>
+        </form>
+      </div>
+
+      <div class="card" style="display: flex; flex-direction: column;">
+        <h3>Daily Snapshot</h3>
+        <p>View everyone's attendance for a particular date.</p>
+        
+        <form action="/admin/reports/date" method="POST" style="margin-top: auto;">
+          <div class="input-group">
+            <label>Select Date</label>
+            <input type="date" name="date" class="input-field" required>
+          </div>
+          <div class="input-group">
+            <label>Class (Optional)</label>
+            <input type="text" name="className" placeholder="All Classes" class="input-field">
+          </div>
+          <div class="info-tag">
+            Leave class blank to see a master list for the entire school.
+          </div>
+          <button class="btn-generate" >View Daily Log</button>
+        </form>
+      </div>
+
+    </div>
+
+    <span class="section-label">Class Analytics</span>
+    <div class="reports-grid">
+      <div class="card">
+        <h3>Class Master Sheet</h3>
+        <p>A full matrix showing all subjects' attendance for an entire class.</p>
+        
+        <form action="/admin/reports/class-subjects" method="POST">
+          <div class="input-group">
+            <label>Target Class</label>
+            <input type="text" name="className" placeholder="e.g. 8D" class="input-field" required>
+          </div>
+          <div class="form-row">
+            <div class="input-group">
+              <label>Start Date</label>
+              <input type="date" name="fromDate" class="input-field" required>
+            </div>
+            <div class="input-group">
+              <label>End Date</label>
+              <input type="date" name="toDate" class="input-field" required>
+            </div>
+          </div>
+          <button class="btn-generate">Generate Class Analysis</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

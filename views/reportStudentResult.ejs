@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    Student Report -
+    <%= student ? (student.name + " (" + student.rollNo + ")") : "Student" %>
+  </title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #87ceeb, #ffffff);
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #1f2933;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #4b5563;
+      margin-bottom: 18px;
+    }
+
+    .chip-row {
+      text-align: center;
+      margin-bottom: 18px;
+      font-size: 0.85rem;
+      color: #111827;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #111827;
+      font-size: 0.8rem;
+      margin: 2px 4px;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .alert {
+      max-width: 900px;
+      margin: 0 auto 14px auto;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .alert.error {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .alert.info {
+      background: #e0f2fe;
+      color: #1d4ed8;
+    }
+
+    .section-card {
+      max-width: 950px;
+      margin: 0 auto 24px auto;
+      background: rgba(255,255,255,0.4);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+      backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+
+    /* Calendar styles */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .day-box {
+      padding: 6px 8px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 0.8rem;
+      border: 1px solid rgba(15,23,42,0.18);
+      background: rgba(255,255,255,0.9);
+    }
+
+    .day-date {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+    .day-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .day-present {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    .day-absent {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .legend {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+
+    .legend span.badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-left: 6px;
+    }
+    .legend .present-badge {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    .legend .absent-badge {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      text-align: center;
+      white-space: nowrap;
+    }
+    th {
+      background: rgba(15,23,42,0.9);
+      color: #fff;
+    }
+
+    .back-btn {
+      display: block;
+      width: fit-content;
+      margin: 18px auto 0;
+      padding: 10px 20px;
+      border-radius: 24px;
+      border: 1.5px solid #111827;
+      background: transparent;
+      color: #111827;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: 0.25s;
+    }
+    .back-btn:hover {
+      background: #111827;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="title">
+    Student Report
+  </div>
+  <div class="subtitle">
+    <%= student ? (student.name + " · Roll " + student.rollNo + " · Class " + student.className) : "" %>
+  </div>
+
+  <div class="chip-row">
+    <span class="chip">From: <%= fromDate || "-" %></span>
+    <span class="chip">To: <%= toDate || "-" %></span>
+    <% if (mode === "subject") { %>
+      <span class="chip">Subject: <strong><%= subject || "-" %></strong></span>
+    <% } else { %>
+      <span class="chip">All subjects combined</span>
+    <% } %>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <% if (mode === "subject") { %>
+    <!-- 🎯 SUBJECT CALENDAR VIEW -->
+    <div class="section-card">
+      <div class="section-title">
+        Calendar View - <%= subject || "Subject" %>
+      </div>
+      <p style="font-size:0.85rem; color:#4b5563; margin:0 0 8px;">
+        Green = Present, Red = Absent for each selected date.
+      </p>
+
+      <% if (!dates || dates.length === 0) { %>
+        <div class="alert info">No dates available in this range.</div>
+      <% } else { %>
+        <div class="calendar-grid">
+          <% dates.forEach(function(d){ 
+               var st = (calendar && calendar[d]) || "Absent";
+          %>
+            <div class="day-box">
+              <div class="day-date"><%= d %></div>
+              <div class="day-status <%= st === 'Present' ? 'day-present' : 'day-absent' %>">
+                <%= st %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+        <div class="legend">
+          Legend:
+          <span class="badge present-badge">Present</span>
+          <span class="badge absent-badge">Absent</span>
+        </div>
+      <% } %>
+    </div>
+
+  <% } else { %>
+    <!-- 🎯 ALL SUBJECTS SUMMARY -->
+    <div class="section-card">
+      <div class="section-title">Subject-wise Attendance Summary</div>
+
+      <% if (!subjectStats || subjectStats.length === 0) { %>
+        <div class="alert info">
+          No subject-wise data found for this date range.
+        </div>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Total Lectures</th>
+              <th>Present</th>
+              <th>Attendance %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% subjectStats.forEach(function(s){ %>
+              <tr>
+                <td><%= s.subject %></td>
+                <td><%= s.totalLectures %></td>
+                <td><%= s.presentCount %></td>
+                <td><%= s.percent.toFixed(1) %>%</td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">Subject-wise Attendance Chart</div>
+      <% if (!subjectStats || subjectStats.length === 0) { %>
+        <div class="alert info">Not enough data to draw chart.</div>
+      <% } else { %>
+        <canvas id="subjectChart" height="260"></canvas>
+      <% } %>
+    </div>
+  <% } %>
+
+  <a href="/admin/reports" class="back-btn">⬅ Back to Reports</a>
+
+  <% if (mode !== "subject" && subjectStats && subjectStats.length > 0) { %>
+    <script>
+      (function(){
+        var ctx = document.getElementById("subjectChart");
+        if (!ctx) return;
+
+        var labels = <%- JSON.stringify(subjectStats.map(s => s.subject)) %>;
+        var data = <%- JSON.stringify(subjectStats.map(s => s.percent)) %>;
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Attendance %",
+              data: data
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  stepSize: 10
+                }
+              }
+            }
+          }
+        });
+      })();
+    </script>
+  <% } %>
+</body>
+</html>

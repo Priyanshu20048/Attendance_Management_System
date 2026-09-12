@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Class Report - <%= className %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --present-bg: #dcfce7;
+      --present-text: #166534;
+      --absent-bg: #fee2e2;
+      --absent-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Header Section */
+    .header-card { 
+      background: white; padding: 30px; border-radius: 20px; 
+      border: 1px solid var(--border); margin-bottom: 30px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .header-card h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+    .header-card p { color: var(--text-muted); font-weight: 500; margin-top: 5px; }
+
+    .chip-row { display: flex; gap: 10px; margin-top: 15px; }
+    .chip { 
+      background: #f1f5f9; padding: 6px 14px; border-radius: 8px; 
+      font-size: 0.75rem; font-weight: 700; color: #475569; border: 1px solid var(--border);
+    }
+
+    /* Subject Card */
+    .subject-card { 
+      background: white; border-radius: 24px; padding: 25px; 
+      border: 1px solid var(--border); margin-bottom: 35px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04);
+    }
+    .subject-header { 
+      display: flex; justify-content: space-between; align-items: flex-start; 
+      padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 20px;
+    }
+    .subject-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .subject-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 4px; }
+    
+    .teacher-info { text-align: right; }
+    .teacher-name { font-weight: 700; font-size: 0.9rem; color: var(--text-main); }
+    .teacher-email { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Table Container with Scroll */
+    .table-responsive { 
+      width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th { background: #f8fafc; padding: 12px 15px; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; text-align: center; border-bottom: 2px solid var(--border); }
+    td { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 600; text-align: center; }
+    
+    .student-cell { text-align: left; background: #fff; position: sticky; left: 0; z-index: 10; border-right: 2px solid var(--border); }
+    
+    /* Status Badges */
+    .status { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: inline-block; }
+    .p-badge { background: var(--present-bg); color: var(--present-text); }
+    .a-badge { background: var(--absent-bg); color: var(--absent-text); }
+
+    .error-box { background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 12px; text-align: center; font-weight: 700; margin-bottom: 20px; border: 1px solid #fecaca; }
+
+    .btn-back { 
+      display: inline-flex; align-items: center; gap: 8px; text-decoration: none; 
+      color: var(--text-muted); font-weight: 700; font-size: 0.9rem; transition: 0.2s;
+    }
+    .btn-back:hover { color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="header-card">
+    <div>
+      <h1>Class Attendance Matrix</h1>
+      <p>Detailed view for Class <strong><%= className %></strong></p>
+      <div class="chip-row">
+        <span class="chip">📅 <%= fromDate || "-" %> — <%= toDate || "-" %></span>
+        <span class="chip">📚 Subjects: <%= subjectReports ? subjectReports.length : 0 %></span>
+      </div>
+    </div>
+    <a href="/admin/reports" class="btn-back">← Back to Reports</a>
+  </div>
+
+  <% if (error) { %>
+    <div class="error-box"><%= error %></div>
+  <% } %>
+
+  <% if (!subjectReports || subjectReports.length === 0) { %>
+    <div class="error-box" style="background: #f1f5f9; color: #475569; border-color: #e2e8f0;">No records found for the selected criteria.</div>
+  <% } else { %>
+    <% subjectReports.forEach(function(sr){ %>
+      <div class="subject-card">
+        <div class="subject-header">
+          <div class="subject-title">Subject: <%= sr.subject %></div>
+          <div class="teacher-info">
+            <div class="teacher-name"><%= sr.teacherName %></div>
+            <div class="teacher-email"><%= sr.teacherEmail %></div>
+            <% if (sr.extraCount > 0) { %>
+              <div style="font-size: 0.7rem; color: var(--primary); margin-top: 2px;">+<%= sr.extraCount %> shared teachers</div>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (!sr.records || sr.records.length === 0) { %>
+          <p style="color: var(--text-muted); font-size: 0.9rem; font-style: italic;">No attendance data logged for this subject.</p>
+        <% } else { %>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th class="student-cell" style="width: 200px;">Student Detail</th>
+                  <% dates.forEach(function(d){ %>
+                    <th><%= d.split('-').slice(1).join('/') %></th> <% }); %>
+                </tr>
+              </thead>
+              <tbody>
+                <% sr.records.forEach(function(rec){ %>
+                  <tr>
+                    <td class="student-cell">
+                      <div style="font-size: 0.85rem;"><%= rec.student.name %></div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted);">Roll: #<%= rec.student.rollNo %></div>
+                    </td>
+                    <% dates.forEach(function(d){ 
+                         var st = (rec.attendance && rec.attendance[d]) || "Absent";
+                    %>
+                      <td>
+                        <span class="status <%= st === 'Present' ? 'p-badge' : 'a-badge' %>">
+                          <%= st === 'Present' ? 'P' : 'A' %>
+                        </span>
+                      </td>
+                    <% }); %>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    <% }); %>
+  <% } %>
+
+</div>
+
+</body>
+</html>

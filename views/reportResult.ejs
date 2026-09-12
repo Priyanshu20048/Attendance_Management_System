@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= type %> - Report</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --present: #22c55e;
+      --absent: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Header Section */
+    .header-card { 
+      background: white; padding: 25px 30px; border-radius: 20px; 
+      border: 1px solid var(--border); margin-bottom: 25px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .header-info h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+    .header-info p { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; margin-top: 4px; }
+
+    /* Action Buttons */
+    .actions-group { display: flex; gap: 10px; }
+    .btn { 
+      padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; transition: 0.2s; border: 1px solid var(--border);
+      display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    }
+    .btn-white { background: white; color: var(--text-main); }
+    .btn-dark { background: var(--text-main); color: white; border: none; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    /* Alert Styling */
+    .alert { 
+      padding: 12px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; 
+      margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    /* Table Styling */
+    .table-card { 
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04);
+    }
+    .table-wrapper { width: 100%; overflow-x: auto; max-height: 70vh; }
+    
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    
+    /* Sticky Header */
+    thead th { 
+      position: sticky; top: 0; z-index: 20;
+      background: #f8fafc; padding: 15px; font-size: 0.75rem; 
+      font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+      border-bottom: 2px solid var(--border); text-align: center;
+    }
+    
+    /* Sticky First Column (Roll No/Name) */
+    .sticky-col { 
+      position: sticky; left: 0; z-index: 10; background: white; 
+      border-right: 2px solid var(--border); text-align: left !important;
+    }
+
+    td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; text-align: center; }
+    tr:hover td { background-color: #f1f5f9; }
+
+    /* Status Indicators */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-text { font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; }
+    .text-present { color: var(--present); }
+    .text-absent { color: var(--absent); }
+    .bg-present { background-color: var(--present); }
+    .bg-absent { background-color: var(--absent); }
+
+    .back-btn { 
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 25px;
+      color: var(--text-muted); font-weight: 700; text-decoration: none; font-size: 0.9rem;
+    }
+    .back-btn:hover { color: var(--primary); }
+
+    @media print {
+      .actions-group, .back-btn, .alert { display: none !important; }
+      body { background: white; padding: 0; }
+      .table-card { border: none; box-shadow: none; }
+      .table-wrapper { max-height: none; overflow: visible; }
+      thead th { position: static; background: #eee !important; color: black; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="header-card">
+    <div class="header-info">
+      <h1><%= type %></h1>
+      <p>Academic Attendance Matrix</p>
+    </div>
+    <div class="actions-group">
+      <button class="btn btn-white" onclick="downloadCSV()">
+        <span>⬇</span> Export CSV
+      </button>
+      <button class="btn btn-dark" onclick="window.print()">
+        <span>🖨</span> Print Report
+      </button>
+    </div>
+  </div>
+
+  <% if (typeof error !== "undefined" && error) { %>
+    <div class="alert alert-error">⚠️ <%= error %></div>
+  <% } else if (records && records.length > 0) { %>
+    <div class="alert alert-info">✨ Found <strong><%= records.length %></strong> student records in this range.</div>
+  <% } %>
+
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table id="reportTable">
+        <thead>
+          <tr>
+            <th class="sticky-col">Student Detail</th>
+            <th>Class</th>
+            <% if (dates && dates.length > 1) { %>
+              <% dates.forEach(function(date){ %>
+                <th><%= date.split('-').slice(1).join('/') %></th>
+              <% }); %>
+            <% } else { %>
+              <th>Date</th>
+              <th>Status</th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!records || records.length === 0) { %>
+            <tr>
+              <td colspan="100" style="padding: 40px; color: var(--text-muted);">No records found for the selected criteria.</td>
+            </tr>
+          <% } else { %>
+            <% records.forEach(function(record){ %>
+              <tr>
+                <td class="sticky-col">
+                  <div style="color: var(--text-main);"><%= record.student.name %></div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Roll No :- <%= record.student.rollNo %></div>
+                </td>
+                <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;"><%= record.student.className %></span></td>
+
+                <% if (dates && dates.length > 1) { %>
+                  <% dates.forEach(function(date){ %>
+                    <td>
+                      <% if (record.attendance[date] === "Present") { %>
+                        <span class="status-text text-present"><span class="dot bg-present"></span>P</span>
+                      <% } else { %>
+                        <span class="status-text text-absent"><span class="dot bg-absent"></span>A</span>
+                      <% } %>
+                    </td>
+                  <% }); %>
+                <% } else { %>
+                  <% var d = Object.keys(record.attendance)[0]; %>
+                  <td><%= d %></td>
+                  <td>
+                    <% if (record.attendance[d] === "Present") { %>
+                      <span class="status-text text-present">Present</span>
+                    <% } else { %>
+                      <span class="status-text text-absent">Absent</span>
+                    <% } %>
+                  </td>
+                <% } %>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <a href="/admin/reports" class="back-btn">← Back to Analytics</a>
+</div>
+
+<script>
+  function downloadCSV() {
+    const table = document.getElementById("reportTable");
+    if (!table) return;
+    let rows = [];
+    const headerCells = table.querySelectorAll("thead tr th");
+    let header = Array.from(headerCells).map(th => `"${th.innerText.trim()}"`);
+    rows.push(header.join(","));
+
+    const bodyRows = table.querySelectorAll("tbody tr");
+    bodyRows.forEach(tr => {
+      const cols = tr.querySelectorAll("td");
+      if (cols.length === 0) return;
+      let row = Array.from(cols).map(td => `"${td.innerText.trim().replace(/\n/g, ' ')}"`);
+      rows.push(row.join(","));
+    });
+
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Attendance_Report_<%= new Date().toLocaleDateString() %>.csv";
+    link.click();
+  }
+</script>
+
+</body>
+</html>
