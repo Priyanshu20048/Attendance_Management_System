@@ -12,7 +12,15 @@ A full-stack attendance management system built with Node.js, Express, MongoDB, 
 - User authentication and role-based access control
 - Profile management with image upload support
 - Real-time online teacher status using Socket.IO
-- Secure sessions and rate-limited login/signup
+- Secure sessions and rate-limited login
+
+## Latest Updates - September 13, 2026
+
+- Disabled public admin and teacher signup from the public authentication flow.
+- Kept teacher account creation under the admin dashboard.
+- Updated the welcome page with Attendify branding, responsive SaaS-style sections, feature highlights, and a login-only call to action.
+- Updated the login page to match the welcome page's branding, colors, responsive layout, and authorized-access messaging.
+- Clearly labeled the landing-page dashboard numbers and charts as sample demo data rather than live attendance statistics.
 
 ## Tech Stack
 
@@ -120,7 +128,7 @@ This project supports role-based access:
 - Admin
 - Teacher
 
-You can create accounts through the signup flow and log in based on the selected role.
+Administrators can create teacher accounts from the protected admin dashboard. Public signup is disabled.
 
 ## Docker Support
 
@@ -133,8 +141,8 @@ docker-compose up --build
 ## Usage
 
 1. Open the app in the browser.
-2. Sign up as an admin or teacher.
-3. Log in to your dashboard.
+2. Log in with an existing admin or teacher account.
+3. Administrators can create teacher accounts from the protected admin dashboard.
 4. Manage students, teachers, attendance, and reports from the relevant interface.
 
 ## Notes

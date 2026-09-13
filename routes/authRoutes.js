@@ -4,7 +4,7 @@ const authController = require("../controllers/authController");
 
 // Welcome Page
 router.get("/", (req, res) => {
-  res.render("welcome"); 
+  res.render("welcome");
 });
 
 router.get("/login", authController.getLogin);
@@ -14,9 +14,14 @@ router.post("/login", (req, res, next) => {
   next();
 }, authController.postLogin);
 
-// Signup Routes
-router.get("/signup", authController.getSignup);
-router.post("/signup", authController.postSignup);
+// Public signup is disabled. Admin can create teacher accounts only from admin panel.
+router.get("/signup", (req, res) => {
+  res.redirect("/login");
+});
+
+router.post("/signup", (req, res) => {
+  res.redirect("/login");
+});
 
 // ✅ Add Logout Route Here
 router.get("/logout", (req, res) => {

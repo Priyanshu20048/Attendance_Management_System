@@ -2,28 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - AttendanceApp</title>
+  <title>Login | Attendify</title>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-light: #e0f2ff;
-      --primary-dark: #1d4ed8;
-      --accent: #16a34a;
-      --bg-page: #f3f4f6;
-      --text-main: #0f172a;
-      --text-muted: #6b7280;
-      --border-soft: #e5e7eb;
+      --primary: #172554;
+      --primary-strong: #0f172a;
+      --primary-soft: #eef4ff;
+      --surface: #ffffff;
+      --surface-alt: #f5f7fb;
+      --text-main: #111827;
+      --text-muted: #5b6477;
+      --border-soft: #e7ebf3;
+      --success: #1f9d72;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Poppins", sans-serif;
+      font-family: "Segoe UI", Inter, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at top left, #e0f2ff 0, #ffffff 45%);
+      background: #f8fafc;
       color: var(--text-main);
       overflow: hidden;
     }
@@ -31,19 +32,20 @@
     /* Background Styles (Sync with Welcome Page) */
     .bg-grid {
       position: fixed; inset: 0;
-      background-image: linear-gradient(rgba(148, 163, 184, 0.10) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-      background-size: 46px 46px; z-index: -3; opacity: 0.3;
+      background-image: linear-gradient(rgba(23, 37, 84, 0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(23, 37, 84, 0.06) 1px, transparent 1px);
+      background-size: 46px 46px; z-index: -3; opacity: 0.45;
     }
     .bg-glow {
       position: fixed; inset: 0;
-      background: radial-gradient(circle at bottom right, rgba(219, 234, 254, 0.8), transparent 55%);
+      background: radial-gradient(circle at bottom right, rgba(219, 234, 254, 0.72), transparent 55%),
+          radial-gradient(circle at top left, rgba(238, 244, 255, 0.9), transparent 48%);
       z-index: -2;
     }
 
     /* Auth Wrapper */
     .auth-wrapper {
-      width: 100%; max-width: 900px;
+      width: 100%; max-width: 980px;
       padding: 20px;
       animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -51,19 +53,19 @@
     .auth-card {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(16px);
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+      border-radius: 24px;
+      border: 1px solid rgba(231, 235, 243, 0.9);
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.1);
       overflow: hidden;
     }
 
     /* Left Side: Gradient Info */
     .auth-side {
-      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      background: linear-gradient(145deg, #172554 0%, #1e3a8a 58%, #2563eb 100%);
       color: white;
-      padding: 40px;
+      padding: 46px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -71,57 +73,55 @@
     }
 
     /* Logo Styling (Consistent) */
-    .logo-icon-wrap { position: relative; width: 42px; height: 42px; margin-bottom: 15px;}
+    .logo-icon-wrap { width: 42px; height: 42px; margin-bottom: 22px;}
     .logo-orbit {
-      position: absolute; inset: -4px; border-radius: 999px;
-      background: conic-gradient(from 210deg, rgba(255,255,255,0.4), #fff, rgba(255,255,255,0.4));
-      filter: blur(5px); animation: spin 6s linear infinite;
+      display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .logo-icon {
-      position: relative; width: 100%; height: 100%; border-radius: 12px;
+      width: 100%; height: 100%; border-radius: 12px;
       background: white; color: var(--primary);
       display: flex; align-items: center; justify-content: center;
       font-weight: 800; font-size: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
-    .auth-side h1 { font-size: 2rem; line-height: 1.2; margin: 20px 0 10px; }
+    .auth-side h1 { font-size: 2.35rem; line-height: 1.08; letter-spacing: -0.04em; margin: 20px 0 14px; }
     .auth-side p { opacity: 0.9; font-size: 0.95rem; line-height: 1.6; }
 
     /* Right Side: Form */
-    .auth-form-wrap { padding: 45px; background: white; }
+    .auth-form-wrap { padding: 52px 48px; background: rgba(255, 255, 255, 0.96); }
 
     .badge-status {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 5px 12px; border-radius: 999px;
-      background: #eff6ff; color: #1d4ed8;
+      background: var(--primary-soft); color: var(--primary);
       font-size: 0.75rem; font-weight: 500; margin-bottom: 20px;
     }
-    .dot { width: 8px; height: 8px; background: #16a34a; border-radius: 50%; box-shadow: 0 0 8px #16a34a; }
+    .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px rgba(31, 157, 114, 0.7); }
 
     .input-group { margin-bottom: 20px; }
-    .input-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: #4b5563; }
+    .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--primary-strong); }
     
     .input-field {
       width: 100%; padding: 12px 18px; border-radius: 12px;
-      border: 1px solid #e5e7eb; background: #f9fafb;
+      border: 1px solid var(--border-soft); background: var(--surface-alt);
       font-size: 0.95rem; transition: all 0.2s;
     }
     .input-field:focus {
       outline: none; border-color: var(--primary);
-      background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      background: var(--surface); box-shadow: 0 0 0 4px rgba(23, 37, 84, 0.1);
     }
 
     /* Primary Button with Shimmer (From Welcome Page) */
     .btn-primary {
-      width: 100%; padding: 13px; border-radius: 12px; border: none;
-      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      width: 100%; padding: 14px; border-radius: 999px; border: none;
+      background: var(--primary);
       color: white; font-weight: 600; font-size: 1rem;
       cursor: pointer; position: relative; overflow: hidden;
-      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 12px 24px rgba(23, 37, 84, 0.2);
       transition: transform 0.2s;
     }
-    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 28px rgba(23, 37, 84, 0.25); }
     .btn-primary::after {
       content: ""; position: absolute; inset: 0;
       background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
@@ -132,14 +132,26 @@
     .alert { padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 20px; border: 1px solid; }
     .alert.error { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
 
-    .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #6b7280; }
+    .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: var(--text-muted); }
     .footer-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      margin-bottom: 28px;
+    }
+
+    .back-link:hover { color: var(--primary); }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 768px) {
       .auth-card { grid-template-columns: 1fr; }
       .auth-side { display: none; }
+      .auth-form-wrap { padding: 40px 30px; }
     }
   </style>
 </head>
@@ -158,10 +170,11 @@
           <h1>Track class attendance smarter.</h1>
           <p>Sign in to manage your students, view subject-wise reports, and export data seamlessly.</p>
         </div>
-        <div style="font-size: 0.8rem; opacity: 0.8;">© 2025 AttendanceApp Systems</div>
+        <div style="font-size: 0.8rem; opacity: 0.8;">Attendify · Smart Attendance Management</div>
       </div>
 
       <div class="auth-form-wrap">
+        <a href="/" class="back-link">← Back to Attendify</a>
         <div class="badge-status">
           <span class="dot"></span> Authorized Access Only
         </div>
@@ -185,7 +198,7 @@
         </form>
 
         <div class="footer-link">
-          New teacher? <a href="/signup">Create an account</a>
+          Contact admin to create a teacher account.
         </div>
       </div>
     </div>
