@@ -28,6 +28,44 @@ function todayStr() {
   return new Date().toISOString().split("T")[0];
 }
 
+function isValidDateString(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
+async function authorizeAttendance(req, res, { className, subject }) {
+  if (!req.session?.user?._id) {
+    res.status(401).send("Unauthorized: Please log in.");
+    return null;
+  }
+
+  const teacher = await User.findById(req.session.user._id).lean();
+  if (!teacher || teacher.role !== "teacher") {
+    res.status(403).send("Forbidden: Teachers only.");
+    return null;
+  }
+
+  const normalizedClass = normalizeClassName(className);
+  const assignedClasses = Array.isArray(teacher.classes)
+    ? teacher.classes.map(normalizeClassName).filter(Boolean)
+    : [];
+
+  if (!assignedClasses.includes(normalizedClass)) {
+    res.status(403).send("Forbidden: This class is not assigned to you.");
+    return null;
+  }
+
+  const assignedSubject = String(teacher.subject || "").trim();
+  const requestedSubject = subject == null ? assignedSubject : String(subject).trim();
+  if (!assignedSubject || requestedSubject !== assignedSubject) {
+    res.status(403).send("Forbidden: This subject is not assigned to you.");
+    return null;
+  }
+
+  return { teacher, className: normalizedClass, subject: assignedSubject };
+}
+
 /* ================= TEACHER DASHBOARD ================= */
 /* ================= TEACHER DASHBOARD ================= */
 
@@ -54,7 +92,6 @@ const getDashboard = async (req, res) => {
       }
     }
 
-    const subject = teacher.subject;
     const classes = Array.isArray(teacher.classes)
       ? teacher.classes.map(normalizeClassName).filter(Boolean)
       : [];
@@ -64,6 +101,17 @@ const getDashboard = async (req, res) => {
     const selectedClass = normalizeClassName(
       req.query.className || classes[0] || ""
     );
+    const authorization = await authorizeAttendance(req, res, {
+      className: selectedClass,
+      subject: null,
+    });
+    if (!authorization) return;
+
+    teacher = authorization.teacher;
+    const subject = authorization.subject;
+    const authorizedClasses = Array.isArray(teacher.classes)
+      ? teacher.classes.map(normalizeClassName).filter(Boolean)
+      : [];
 
     /* ---------- BASIC VALIDATIONS (NO REDIS) ---------- */
     if (!subject || classes.length === 0) {
@@ -80,7 +128,7 @@ const getDashboard = async (req, res) => {
       });
     }
 
-    if (!classes.includes(selectedClass)) {
+    if (!authorizedClasses.includes(selectedClass)) {
       return res.render("teacherDashboard", {
         user: req.session.user,
         classes,
@@ -94,7 +142,7 @@ const getDashboard = async (req, res) => {
       });
     }
 
-    if (selectedDate > today) {
+    if (!isValidDateString(selectedDate) || selectedDate > today) {
       return res.render("teacherDashboard", {
         user: req.session.user,
         classes,
@@ -200,14 +248,31 @@ const getDashboard = async (req, res) => {
 
 const markAttendance = async (req, res) => {
   try {
-    const teacher = req.session.user;
-    const subject = teacher.subject;
     const io = req.app.get("io");
 
-    let { studentId, className, date, status, markAll } = req.body;
+    let { studentId, className, subject: requestedSubject, date, status, markAll } = req.body;
     className = normalizeClassName(className);
     const today = todayStr();
     date = date || today;
+
+    const authorization = await authorizeAttendance(req, res, {
+      className,
+      subject: requestedSubject || null,
+    });
+    if (!authorization) return;
+
+    const { teacher, subject } = authorization;
+
+    if (!isValidDateString(date) || date > today) {
+      return res.status(400).send("Invalid or future attendance date.");
+    }
+
+    if (!markAll) {
+      const student = await Student.findOne({ _id: studentId, className });
+      if (!student) {
+        return res.status(400).send("Student does not belong to this class.");
+      }
+    }
 
     if (markAll === "1") {
       const students = await Student.find({ className });

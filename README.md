@@ -14,13 +14,15 @@ A full-stack attendance management system built with Node.js, Express, MongoDB, 
 - Real-time online teacher status using Socket.IO
 - Secure sessions and rate-limited login
 
-## Latest Updates - September 13, 2026
+## Latest Updates - September 14, 2026
 
 - Disabled public admin and teacher signup from the public authentication flow.
 - Kept teacher account creation under the admin dashboard.
 - Updated the welcome page with Attendify branding, responsive SaaS-style sections, feature highlights, and a login-only call to action.
 - Updated the login page to match the welcome page's branding, colors, responsive layout, and authorized-access messaging.
 - Clearly labeled the landing-page dashboard numbers and charts as sample demo data rather than live attendance statistics.
+- Restricted attendance access to the teacher's assigned classes and subject.
+- Added validation to prevent invalid or future attendance dates and cross-class student submissions.
 
 ## Tech Stack
 
@@ -114,6 +116,8 @@ Or run the production-style start command:
 ```bash
 npm start
 ```
+
+On Windows PowerShell, use `npm.cmd start` if script execution policy blocks `npm start`.
 
 The app will run on:
 
