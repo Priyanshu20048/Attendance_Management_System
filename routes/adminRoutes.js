@@ -38,7 +38,6 @@ router.post("/reports/student", adminController.studentReport);
 router.post("/reports/date", adminController.dateReport);
 
 router.post("/reports/class-subjects", adminController.classSubjectsReport);
-router.post("/reports/student", adminController.studentReport);
 
 
 // ----------------- Profile -----------------

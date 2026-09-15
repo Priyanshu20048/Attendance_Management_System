@@ -523,28 +523,13 @@ const updateTeacher = async (req, res) => {
     }
 
     let updatedClasses = null;
+    const updatedSubject =
+      newSubject && newSubject.trim() ? newSubject.trim() : teacher.subject;
     if (newClassesInput && newClassesInput.trim()) {
       updatedClasses = newClassesInput
         .split(",")
         .map((c) => c.trim().toUpperCase())
         .filter((c) => c);
-        // 🔒 SUBJECT + CLASS DUPLICATE CHECK
-for (let c of classes) {
-  const conflict = await User.findOne({
-    role: "teacher",
-    subject: subject.trim(),
-    classes: c,
-  });
-
-  if (conflict) {
-    return res.render("teachers", {
-      teachers: teacherList,
-      error: `❌ ${subject} is already assigned for class ${c} to ${conflict.name}`,
-      success: null,
-    });
-  }
-}
-
 
       if (updatedClasses.length === 0) {
         return res.render("teachers", {
@@ -566,9 +551,27 @@ for (let c of classes) {
       }
     }
 
+    const classesToCheck = updatedClasses || teacher.classes || [];
+    for (const className of classesToCheck) {
+      const conflict = await User.findOne({
+        _id: { $ne: teacher._id },
+        role: "teacher",
+        subject: updatedSubject,
+        classes: className,
+      });
+
+      if (conflict) {
+        return res.render("teachers", {
+          teachers: teacherList,
+          error: `❌ ${updatedSubject} is already assigned for class ${className} to ${conflict.name}`,
+          success: null,
+        });
+      }
+    }
+
     if (newName) teacher.name = newName;
     if (newEmail) teacher.email = newEmail;
-    if (newSubject && newSubject.trim()) teacher.subject = newSubject.trim();
+    if (newSubject && newSubject.trim()) teacher.subject = updatedSubject;
 
     if (newPassword) {
       teacher.password = await bcrypt.hash(newPassword, 10);

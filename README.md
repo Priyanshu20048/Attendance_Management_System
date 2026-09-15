@@ -14,7 +14,7 @@ A full-stack attendance management system built with Node.js, Express, MongoDB, 
 - Real-time online teacher status using Socket.IO
 - Secure sessions and rate-limited login
 
-## Latest Updates - September 14, 2026
+## Latest Updates - September 15, 2026
 
 - Disabled public admin and teacher signup from the public authentication flow.
 - Kept teacher account creation under the admin dashboard.
@@ -23,6 +23,8 @@ A full-stack attendance management system built with Node.js, Express, MongoDB, 
 - Clearly labeled the landing-page dashboard numbers and charts as sample demo data rather than live attendance statistics.
 - Restricted attendance access to the teacher's assigned classes and subject.
 - Added validation to prevent invalid or future attendance dates and cross-class student submissions.
+- Added teacher assignment conflict validation so the same subject and class cannot be assigned to multiple teachers.
+- Removed the duplicate student report route registration from the admin routes.
 
 ## Tech Stack
 
