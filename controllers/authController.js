@@ -146,15 +146,18 @@ exports.getLogin = (req, res) => {
 exports.postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    if (!password || password.length < 8) {
+    if (!normalizedEmail || !password || password.length < 8) {
       return res.render("login", {
-        error: "Password must be at least 8 characters long!",
+        error: normalizedEmail
+          ? "Password must be at least 8 characters long!"
+          : "Please enter a valid email address.",
         success: null,
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.render("login", {

@@ -137,18 +137,6 @@ app.use("/", authRoutes);
 app.use("/admin", isAuthenticated, isAdmin, adminRoutes);
 app.use("/teacher", isAuthenticated, isTeacher, teacherRoutes);
 
-app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Logout Error:", err);
-      return res.redirect("/");
-    }
-    res.clearCookie("connect.sid"); 
-    res.render("logout"); 
-  });
-});
-
-
 app.use((req, res) => res.status(404).send("404 Not Found"));
 
 app.use((err, req, res, next) => {
